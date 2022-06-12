@@ -15,12 +15,14 @@ def scrape_all():
 
     # Run all scraping functions and store results in a dictionary
     data = {
-        "news_title": news_title,
-        "news_paragraph": news_paragraph,
-        "featured_image": featured_image(browser),
-        "facts": mars_facts(),
-        "last_modified": dt.datetime.now()
-    }
+            "news_title": news_title,
+            "news_paragraph": news_paragraph,
+            "featured_image": featured_image(browser),
+            "facts": mars_facts(),
+            "last_modified": dt.datetime.now(),
+            "hemispheres": hemispheres(browser)
+        }
+
 
     # Stop webdriver and return data
     browser.quit()
@@ -121,9 +123,49 @@ def mars_facts():
 
    # Stop webdriver and return data
 
-
-if __name__ == "__main__":
+    if __name__ == "__main__":
     # If running as script, print scraped data
-    print(scrape_all())
+        print(scrape_all())
 
+
+# ## Mars Hemispheres
+
+def hemispheres(browser):
+
+    url = 'https://marshemispheres.com/'
+
+    browser.visit(url)
+
+    hemisphere_image_urls = []
+
+    html = browser.html
+    html_soup = soup(html, 'html.parser')
+
+
+
+    photos = html_soup.find_all('div', class_='item')
+
+    for photo in photos:
+
+        hemis_url = photo.find('a', class_='itemLink').get('href')
+        full_url = url + hemis_url
+        
+        browser.visit(full_url)
+        
+        html = browser.html
+        html_soup = soup(html, 'html.parser')
+        
+        image = html_soup.find('img', class_='wide-image').get('src')
+        img_url = url + image
+        
+        
+        title = html_soup.find('h2', class_='title').text.split("Enhanced")[0].strip()
+        
+        
+        data = {"img_url" : img_url, "title" : title}
+        
+        hemisphere_image_urls.append(data)
+    
+    return hemisphere_image_urls
+    
 
